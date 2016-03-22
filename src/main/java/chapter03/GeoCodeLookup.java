@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.code.geocoder.Geocoder;
 import com.google.code.geocoder.GeocoderRequestBuilder;
 import com.google.code.geocoder.model.GeocodeResponse;
+import com.google.code.geocoder.model.GeocoderAddressComponent;
 import com.google.code.geocoder.model.GeocoderRequest;
 import com.google.code.geocoder.model.GeocoderResult;
 import com.google.code.geocoder.model.GeocoderStatus;
@@ -26,7 +27,7 @@ public class GeoCodeLookup extends BaseBasicBolt{
 	 */
 	private static final long serialVersionUID = -1605495486694518703L;
 	private Geocoder geocoder;
-	
+	private int counter = 0;
 	
 	
 	@Override
@@ -52,18 +53,32 @@ public class GeoCodeLookup extends BaseBasicBolt{
 				.getGeocoderRequest();
 		GeocodeResponse response = geocoder.geocode(request);
 		GeocoderStatus status = response.getStatus();
+		System.out.println("Geocoder status " + status.toString());
 		if (GeocoderStatus.OK.equals(status)){
 			GeocoderResult firstResult = response.getResults().get(0);
 			LatLng latLng = firstResult.getGeometry().getLocation();
-			collector.emit(new Values(time,latLng));
+			String city = extractCity(firstResult);
+			counter++;
+			System.out.println("Emitiram ..." + counter + "latlng="  + latLng.toString() + " city=" + city);
+			
+			collector.emit(new Values(time,latLng,city));
 		}
 		
 		
 	}
 
+	private String extractCity(GeocoderResult firstResult) {
+		for (GeocoderAddressComponent component: firstResult.getAddressComponents()){
+			if (component.getTypes().contains("locality")){
+				return component.getLongName();
+			}
+		}
+		return "";
+	}
+
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("time","geocode"));
+		declarer.declare(new Fields("time","geocode","city"));
 		
 	}
 

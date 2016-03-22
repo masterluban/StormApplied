@@ -36,6 +36,7 @@ public class Persistor extends BaseBasicBolt{
 		
 		try{
 			String key = "checkins-" + timeInterval;
+			System.err.println("Writing to db");
 		    String value = objectMapper.writeValueAsString(hotzones);
 		    jedis.set(key, value);
 		}

@@ -39,12 +39,15 @@ public class Checkins extends BaseRichSpout {
 
 	@Override
 	public void nextTuple() {
-		String checkin = checkins.get(nextEmitIndex);
-		String[] parts = checkin.split(",");
-		Long time = Long.valueOf(parts[0]);
-		String address = parts[1];
-		outputCollector.emit(new Values(time, address));
-		nextEmitIndex = (nextEmitIndex+1) % checkins.size();
+		if (nextEmitIndex < checkins.size()){
+			String checkin = checkins.get(nextEmitIndex);
+			String[] parts = checkin.split(",");
+			Long time = Long.valueOf(parts[0]);
+			String address = parts[1];
+			outputCollector.emit(new Values(time, address));
+			nextEmitIndex = (nextEmitIndex+1);
+		}
+		//nextEmitIndex = (nextEmitIndex+1) % checkins.size();
 	}
 
 	@Override

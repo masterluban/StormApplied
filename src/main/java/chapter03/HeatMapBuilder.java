@@ -32,7 +32,7 @@ public class HeatMapBuilder extends BaseBasicBolt{
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
 		Config conf = new Config();
-		conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS,60);
+		conf.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS,20);
 		return conf;
 	}
 
@@ -48,15 +48,16 @@ public class HeatMapBuilder extends BaseBasicBolt{
 			emitHeatmap(collector);
 		}
 		else {
-			Long time = input.getLongByField("time");
-			LatLng geocode = (LatLng) input.getValueByField("address");
-			Long timeInterval = selectTimeInterval(time);
+			Long timeInterval = input.getLongByField("time-interval");
+			LatLng geocode = (LatLng) input.getValueByField("geocode");
 			List<LatLng> checkins = getCheckinsForInterval(timeInterval); 
 			checkins.add(geocode);
 		}
 	}
 
 	private void emitHeatmap(BasicOutputCollector collector) {
+		System.out.println("EmitHeatMap");
+		
 		Long now = System.currentTimeMillis();
 		Long emitUpToTimeInterval = selectTimeInterval(now);
 		Set<Long> timeIntervalsAvailable = heatMaps.keySet();
